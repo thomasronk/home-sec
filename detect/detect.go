@@ -11,11 +11,13 @@ import (
 
 const MinimumArea = 3000
 
-func Run() {
-	deviceID := os.Args[1]
+func Run(camPort string) {
+	deviceID := camPort
 	webcam, err := gocv.OpenVideoCapture(deviceID)
+
 	if err != nil {
 		fmt.Printf("Error opening Video device: %v", deviceID)
+		os.Exit(1)
 	}
 
 	defer webcam.Close()
