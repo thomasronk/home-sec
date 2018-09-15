@@ -1,23 +1,28 @@
 package detect
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
 	"os"
+	"strconv"
 
 	"gocv.io/x/gocv"
 )
 
 const MinimumArea = 3000
 
-func Run(camPort string) {
-	deviceID := camPort
-	webcam, err := gocv.OpenVideoCapture(deviceID)
-
+func Run() error {
+	deviceID, err := strconv.Atoi(os.Args[1])
+	if err != nil {
+		fmt.Print("Not converted to int")
+		return err
+	}
+	webcam, err := gocv.VideoCaptureDevice(deviceID)
 	if err != nil {
 		fmt.Printf("Error opening Video device: %v", deviceID)
-		os.Exit(1)
+		return err
 	}
 
 	defer webcam.Close()
@@ -42,9 +47,10 @@ func Run(camPort string) {
 	for {
 		if ok := webcam.Read(&img); !ok {
 			fmt.Printf("Device closed: %v\n", deviceID)
-			return
+			return errors.New("Shit")
 		}
 		if img.Empty() {
+			fmt.Printf("Empty")
 			continue
 		}
 
@@ -81,9 +87,10 @@ func Run(camPort string) {
 
 		gocv.PutText(&img, status, image.Pt(10, 20), gocv.FontHersheyPlain, 1.2, statusColor, 2)
 
-		//window.IMShow(img)
+		window.IMShow(img)
 		if window.WaitKey(1) == 27 {
 			break
 		}
 	}
+	return nil
 }
